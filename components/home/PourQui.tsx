@@ -37,13 +37,13 @@ export default function PourQui() {
     {
       title: 'Couples',
       description: 'Communication rompue, conflits récurrents, désaccords éducatifs, baisse du désir, infidélité, projet commun à (re)construire.',
-      image: '/images/luemen-rutkowski-ZWbBxZ6zTwM-unsplash.jpg',
+      image: '/images/timo-stern-EvcUtLF12XQ-unsplash.jpg',
       alt: 'Couple en échange'
     },
     {
       title: 'Parents / enfant',
       description: 'Parler d\'affectivité et de sexualité, poser des limites, accompagner face aux contenus en ligne.',
-      image: '/images/timo-stern-EvcUtLF12XQ-unsplash.jpg',
+      image: '/images/luemen-rutkowski-ZWbBxZ6zTwM-unsplash.jpg',
       alt: 'Communication parent-enfant'
     }
   ];

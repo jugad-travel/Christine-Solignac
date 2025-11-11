@@ -12,12 +12,14 @@ export default function CTASection() {
         <p className="text-xl mb-10 opacity-90">
           Prendre rendez-vous est une démarche positive vers le changement.
         </p>
-        <Link
-          href="/contact"
+        <a
+          href="https://planify.fr"
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-block bg-white text-primary px-10 py-4 rounded-full text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl hover-lift"
         >
           Prendre rendez-vous
-        </Link>
+        </a>
       </div>
     </section>
   );

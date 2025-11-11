@@ -79,12 +79,14 @@ export default function OuConsulter() {
         </div>
 
         <div className="text-center reveal">
-          <Link
-            href="/contact"
+          <a
+            href="https://planify.fr"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block bg-primary text-white px-10 py-4 rounded-full text-lg hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl hover-lift"
           >
             Prendre rendez-vous
-          </Link>
+          </a>
         </div>
       </div>
     </section>

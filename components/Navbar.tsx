@@ -27,12 +27,14 @@ export default function Navbar() {
             <Link href="/contact" className="text-primary hover:opacity-80 transition">
               Contact & rendez-vous
             </Link>
-            <Link 
-              href="/contact" 
+            <a 
+              href="https://planify.fr"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark transition"
             >
               Prendre rendez-vous
-            </Link>
+            </a>
           </div>
 
           {/* Mobile menu button */}
@@ -75,13 +77,15 @@ export default function Navbar() {
             >
               Contact & rendez-vous
             </Link>
-            <Link 
-              href="/contact" 
+            <a 
+              href="https://planify.fr"
+              target="_blank"
+              rel="noopener noreferrer"
               className="block bg-primary text-white px-6 py-2 rounded-full text-center"
               onClick={() => setIsMenuOpen(false)}
             >
               Prendre rendez-vous
-            </Link>
+            </a>
           </div>
         )}
       </div>
