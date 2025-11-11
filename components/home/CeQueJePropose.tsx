@@ -30,12 +30,12 @@ export default function CeQueJePropose() {
     {
       title: 'Conseil conjugal et familial',
       description: 'Écoute active, mise en mots, recentrage sur les besoins.',
-      image: '/images/klara-kulikova-tS_p3fpe8iQ-unsplash.jpg'
+      image: '/images/jochen-van-wylick-ex0pl-zo7NM-unsplash.jpg'
     },
     {
       title: 'Thérapie de couple (approche systémique)',
       description: 'Explorer les schémas relationnels/communication pour faire évoluer les comportements sources de tension.',
-      image: '/images/jochen-van-wylick-ex0pl-zo7NM-unsplash.jpg'
+      image: '/images/klara-kulikova-tS_p3fpe8iQ-unsplash.jpg'
     },
     {
       title: 'Accompagnement des parents / EVRAS',
