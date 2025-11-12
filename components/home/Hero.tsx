@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Hero() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [imagePosition, setImagePosition] = useState('center center');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRefMobile = useRef<HTMLVideoElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -24,21 +25,51 @@ export default function Hero() {
       observer.observe(sectionRef.current);
     }
 
-    // Ajuster position image sur mobile
-    const updateImagePosition = () => {
-      if (window.innerWidth < 768) {
-        setImagePosition('center center');
-      } else {
-        setImagePosition('center center');
+    // Gérer le chargement et la lecture de la vidéo avec transition
+    const handleVideoLoad = () => {
+      setVideoLoaded(true);
+    };
+
+    const playVideo = async (video: HTMLVideoElement | null) => {
+      if (video) {
+        try {
+          // Transition douce au démarrage
+          video.style.opacity = '0';
+          video.style.transition = 'opacity 1.5s ease-in-out';
+          
+          // Attendre que la vidéo soit prête
+          if (video.readyState >= 2) {
+            await video.play();
+            setTimeout(() => {
+              video.style.opacity = '1';
+            }, 200);
+          } else {
+            video.addEventListener('loadeddata', () => {
+              video.play().then(() => {
+                setTimeout(() => {
+                  video.style.opacity = '1';
+                }, 200);
+              });
+            }, { once: true });
+          }
+        } catch (error) {
+          console.log('Erreur de lecture vidéo:', error);
+        }
       }
     };
 
-    updateImagePosition();
-    window.addEventListener('resize', updateImagePosition);
+    if (videoRef.current) {
+      videoRef.current.addEventListener('loadeddata', handleVideoLoad);
+      playVideo(videoRef.current);
+    }
+
+    if (videoRefMobile.current) {
+      videoRefMobile.current.addEventListener('loadeddata', handleVideoLoad);
+      playVideo(videoRefMobile.current);
+    }
 
     return () => {
       observer.disconnect();
-      window.removeEventListener('resize', updateImagePosition);
     };
   }, []);
 
@@ -48,21 +79,20 @@ export default function Hero() {
         {/* Version Mobile */}
         <div className="md:hidden relative min-h-[85vh] w-full overflow-hidden">
           <div className="relative h-full w-full min-h-[85vh]">
-            <Image
-              src="/images/christine solignac B&W.png"
-              alt="Christine Solignac"
-              fill
-              className="object-cover"
-              style={{ objectPosition: 'center center' }}
-              priority
-              quality={90}
-            />
-            {/* Dégradé vertical léger pour équilibrer */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/30"></div>
+            <video
+              ref={videoRefMobile}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ opacity: videoLoaded ? 1 : 0, transition: 'opacity 1s ease-in-out' }}
+            >
+              <source src="/images/66823-520427407_small.mp4" type="video/mp4" />
+            </video>
+            {/* Dégradé de gauche à droite */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent z-0"></div>
           </div>
-          
-          {/* Dégradé horizontal pour la lisibilité du texte */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent z-0"></div>
           
           {/* Contenu superposé */}
           <div className="absolute inset-0 flex flex-col justify-center px-6 py-12 z-10">
@@ -113,17 +143,19 @@ export default function Hero() {
 
         {/* Version Desktop */}
         <div className="hidden md:block relative h-[90vh] w-full overflow-hidden">
-          <Image
-            src="/images/christine solignac B&W.png"
-            alt="Christine Solignac"
-            fill
-            className="object-cover"
-            style={{ objectPosition: 'center center' }}
-            priority
-            quality={90}
-          />
-          {/* Dégradé - photo à droite, texte à gauche */}
-          <div className="absolute inset-0 bg-gradient-to-l from-white via-white/60 to-transparent"></div>
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ opacity: videoLoaded ? 1 : 0, transition: 'opacity 1s ease-in-out' }}
+          >
+            <source src="/images/66823-520427407_small.mp4" type="video/mp4" />
+          </video>
+          {/* Dégradé de gauche à droite */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent"></div>
           
           {/* Contenu superposé à gauche */}
           <div className="absolute inset-0 flex items-center justify-start pl-16 lg:pl-24 xl:pl-32 z-10">
