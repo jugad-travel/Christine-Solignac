@@ -25,88 +25,75 @@ export default function Hero() {
       observer.observe(sectionRef.current);
     }
 
-    // Gérer le chargement et la lecture de la vidéo avec transition
-    const handleVideoLoad = () => {
-      setVideoLoaded(true);
-    };
-
-    const forcePlayVideo = async (video: HTMLVideoElement, retries = 3) => {
+    // Fonction pour garantir l'autoplay en respectant toutes les conditions
+    const ensureAutoplay = (video: HTMLVideoElement) => {
       if (!video) return;
+
+      // Conditions essentielles pour l'autoplay
+      video.muted = true;
+      video.playsInline = true;
+      video.setAttribute('playsinline', 'true');
+      video.setAttribute('webkit-playsinline', 'true');
+      video.setAttribute('x5-playsinline', 'true');
       
-      try {
-        // Forcer la lecture sur mobile
-        video.setAttribute('playsinline', 'true');
-        video.setAttribute('webkit-playsinline', 'true');
-        video.setAttribute('x5-playsinline', 'true');
-        video.muted = true;
-        video.playsInline = true;
-        
-        // Transition douce au démarrage
-        video.style.opacity = '0';
-        video.style.transition = 'opacity 1.5s ease-in-out';
-        
-        // Essayer de jouer immédiatement
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-          await playPromise;
-          setTimeout(() => {
-            video.style.opacity = '1';
-          }, 200);
-          setVideoLoaded(true);
-        }
-      } catch (error) {
-        // Si échec, réessayer après un court délai
-        if (retries > 0) {
-          setTimeout(() => {
-            forcePlayVideo(video, retries - 1);
-          }, 300);
+      // Fonction pour jouer quand la vidéo est vraiment prête
+      const playWhenReady = () => {
+        // Vérifier que la vidéo a assez de données pour jouer
+        if (video.readyState >= 2) {
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                setVideoLoaded(true);
+                video.style.opacity = '1';
+              })
+              .catch((error) => {
+                // Si échec, réessayer après un court délai
+                setTimeout(() => {
+                  if (video.readyState >= 2) {
+                    video.play()
+                      .then(() => {
+                        setVideoLoaded(true);
+                        video.style.opacity = '1';
+                      })
+                      .catch(() => {});
+                  }
+                }, 200);
+              });
+          }
         } else {
-          // Dernière tentative : attendre que la vidéo soit complètement chargée
-          const tryPlayWhenReady = () => {
-            if (video.readyState >= 3) {
-              video.play()
-                .then(() => {
-                  setTimeout(() => {
-                    video.style.opacity = '1';
-                  }, 200);
-                  setVideoLoaded(true);
-                })
-                .catch(() => {
-                  // Si toujours bloqué, essayer sur événements de chargement
-                  video.addEventListener('canplay', () => {
-                    video.play().then(() => {
-                      setTimeout(() => {
-                        video.style.opacity = '1';
-                      }, 200);
-                      setVideoLoaded(true);
-                    }).catch(() => {});
-                  }, { once: true });
-                  
-                  video.addEventListener('canplaythrough', () => {
-                    video.play().then(() => {
-                      setTimeout(() => {
-                        video.style.opacity = '1';
-                      }, 200);
-                      setVideoLoaded(true);
-                    }).catch(() => {});
-                  }, { once: true });
-                });
-            } else {
-              setTimeout(tryPlayWhenReady, 100);
-            }
-          };
-          tryPlayWhenReady();
+          // Attendre que la vidéo soit prête
+          setTimeout(playWhenReady, 100);
         }
-      }
+      };
+
+      // Écouter les événements de chargement pour jouer dès que possible
+      const handleCanPlay = () => {
+        video.play()
+          .then(() => {
+            setVideoLoaded(true);
+            video.style.opacity = '1';
+          })
+          .catch(() => {});
+      };
+
+      video.addEventListener('canplay', handleCanPlay, { once: true });
+      video.addEventListener('canplaythrough', handleCanPlay, { once: true });
+      video.addEventListener('loadeddata', () => {
+        playWhenReady();
+      }, { once: true });
+
+      // Essayer immédiatement si déjà prêt
+      playWhenReady();
     };
 
-    // Utiliser IntersectionObserver pour déclencher la lecture dès que visible
+    // Utiliser IntersectionObserver pour déclencher dès que visible
     const videoObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const video = entry.target as HTMLVideoElement;
-            forcePlayVideo(video);
+            ensureAutoplay(video);
             videoObserver.unobserve(video);
           }
         });
@@ -115,17 +102,13 @@ export default function Hero() {
     );
 
     if (videoRef.current) {
-      videoRef.current.addEventListener('loadeddata', handleVideoLoad);
       videoObserver.observe(videoRef.current);
-      // Essayer aussi immédiatement
-      forcePlayVideo(videoRef.current);
+      ensureAutoplay(videoRef.current);
     }
 
     if (videoRefMobile.current) {
-      videoRefMobile.current.addEventListener('loadeddata', handleVideoLoad);
       videoObserver.observe(videoRefMobile.current);
-      // Essayer aussi immédiatement
-      forcePlayVideo(videoRefMobile.current);
+      ensureAutoplay(videoRefMobile.current);
     }
 
     return () => {
@@ -153,14 +136,30 @@ export default function Hero() {
               style={{ opacity: videoLoaded ? 1 : 0, transition: 'opacity 1s ease-in-out' }}
               onLoadedData={(e) => {
                 const video = e.target as HTMLVideoElement;
-                // Forcer la lecture immédiatement
+                // S'assurer que toutes les conditions sont remplies
                 video.muted = true;
                 video.playsInline = true;
-                video.play().catch(() => {
-                  // Réessayer plusieurs fois
-                  setTimeout(() => video.play().catch(() => {}), 100);
-                  setTimeout(() => video.play().catch(() => {}), 500);
-                });
+                // Jouer seulement si la vidéo est prête
+                if (video.readyState >= 2) {
+                  video.play()
+                    .then(() => {
+                      setVideoLoaded(true);
+                      video.style.opacity = '1';
+                    })
+                    .catch(() => {
+                      // Réessayer après un court délai
+                      setTimeout(() => {
+                        if (video.readyState >= 2) {
+                          video.play()
+                            .then(() => {
+                              setVideoLoaded(true);
+                              video.style.opacity = '1';
+                            })
+                            .catch(() => {});
+                        }
+                      }, 200);
+                    });
+                }
               }}
             >
               <source src="/images/66823-520427407_small.mp4" type="video/mp4" />
