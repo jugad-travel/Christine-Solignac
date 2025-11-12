@@ -27,7 +27,7 @@ export default function Hero() {
     // Ajuster position image sur mobile
     const updateImagePosition = () => {
       if (window.innerWidth < 768) {
-        setImagePosition('center 10%');
+        setImagePosition('left center');
       } else {
         setImagePosition('center center');
       }
