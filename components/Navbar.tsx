@@ -9,10 +9,10 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex flex-col">
-            <div className="text-2xl font-serif text-primary">Christine Solignac</div>
+            <div className="text-lg md:text-2xl font-serif text-primary">Christine Solignac</div>
             <div className="text-xs text-gray-600 hidden sm:block">Conseil Conjugal et Familial</div>
           </Link>
 

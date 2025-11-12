@@ -69,12 +69,12 @@ export default function CeQueJePropose() {
               <div className={`absolute inset-0 ${index % 2 === 0 ? 'bg-gradient-to-r from-white via-white/85 to-transparent' : 'bg-gradient-to-l from-white via-white/85 to-transparent'}`}></div>
               
               {/* Contenu superposé */}
-              <div className={`absolute inset-0 flex items-center ${index % 2 === 0 ? 'justify-start pl-8 md:pl-16 lg:pl-24 xl:pl-32' : 'justify-end pr-8 md:pr-16 lg:pr-24 xl:pr-32'}`}>
+              <div className={`absolute inset-0 flex items-center ${index % 2 === 0 ? 'justify-start px-4 sm:pl-8 md:pl-16 lg:pl-24 xl:pl-32' : 'justify-end px-4 sm:pr-8 md:pr-16 lg:pr-24 xl:pr-32'}`}>
                 <div className={`max-w-lg ${index % 2 === 0 ? 'text-left' : 'text-right'}`}>
-                  <h3 className="text-3xl md:text-4xl font-serif text-primary mb-6">
+                  <h3 className="text-xl sm:text-2xl md:text-4xl font-serif text-primary mb-3 md:mb-6">
                     {service.title}
                   </h3>
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
                     {service.description}
                   </p>
                 </div>
