@@ -94,3 +94,22 @@ a:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 25px rgba(47, 95, 107, 0.15);
 }
+
+/* Masquer les contrôles vidéo natifs uniquement sur mobile */
+@media (max-width: 768px) {
+  video::-webkit-media-controls {
+    display: none !important;
+  }
+  video::-webkit-media-controls-enclosure {
+    display: none !important;
+  }
+  video::-webkit-media-controls-panel {
+    display: none !important;
+  }
+  video::-webkit-media-controls-play-button {
+    display: none !important;
+  }
+  video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+  }
+}

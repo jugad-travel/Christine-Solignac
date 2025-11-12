@@ -37,19 +37,62 @@ export default function Hero() {
           video.style.opacity = '0';
           video.style.transition = 'opacity 1.5s ease-in-out';
           
+          // Forcer la lecture sur mobile
+          video.setAttribute('playsinline', 'true');
+          video.setAttribute('webkit-playsinline', 'true');
+          video.setAttribute('x5-playsinline', 'true');
+          video.muted = true;
+          
           // Attendre que la vidéo soit prête
           if (video.readyState >= 2) {
-            await video.play();
-            setTimeout(() => {
-              video.style.opacity = '1';
-            }, 200);
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  setTimeout(() => {
+                    video.style.opacity = '1';
+                  }, 200);
+                })
+                .catch(() => {
+                  // Si autoplay échoue, essayer après interaction utilisateur
+                  const handleInteraction = () => {
+                    video.play().then(() => {
+                      setTimeout(() => {
+                        video.style.opacity = '1';
+                      }, 200);
+                    });
+                    document.removeEventListener('touchstart', handleInteraction);
+                    document.removeEventListener('click', handleInteraction);
+                  };
+                  document.addEventListener('touchstart', handleInteraction, { once: true });
+                  document.addEventListener('click', handleInteraction, { once: true });
+                });
+            }
           } else {
             video.addEventListener('loadeddata', () => {
-              video.play().then(() => {
-                setTimeout(() => {
-                  video.style.opacity = '1';
-                }, 200);
-              });
+              const playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise
+                  .then(() => {
+                    setTimeout(() => {
+                      video.style.opacity = '1';
+                    }, 200);
+                  })
+                  .catch(() => {
+                    // Si autoplay échoue, essayer après interaction utilisateur
+                    const handleInteraction = () => {
+                      video.play().then(() => {
+                        setTimeout(() => {
+                          video.style.opacity = '1';
+                        }, 200);
+                      });
+                      document.removeEventListener('touchstart', handleInteraction);
+                      document.removeEventListener('click', handleInteraction);
+                    };
+                    document.addEventListener('touchstart', handleInteraction, { once: true });
+                    document.addEventListener('click', handleInteraction, { once: true });
+                  });
+              }
             }, { once: true });
           }
         } catch (error) {
@@ -85,8 +128,17 @@ export default function Hero() {
               muted
               loop
               playsInline
+              preload="auto"
+              webkit-playsinline="true"
+              x5-playsinline="true"
               className="absolute inset-0 w-full h-full object-cover"
               style={{ opacity: videoLoaded ? 1 : 0, transition: 'opacity 1s ease-in-out' }}
+              onLoadedData={(e) => {
+                const video = e.target as HTMLVideoElement;
+                video.play().catch(() => {
+                  // Si autoplay échoue, on peut essayer de jouer après interaction
+                });
+              }}
             >
               <source src="/images/66823-520427407_small.mp4" type="video/mp4" />
             </video>
@@ -149,8 +201,17 @@ export default function Hero() {
             muted
             loop
             playsInline
+            preload="auto"
+            webkit-playsinline="true"
+            x5-playsinline="true"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ opacity: videoLoaded ? 1 : 0, transition: 'opacity 1s ease-in-out' }}
+            onLoadedData={(e) => {
+              const video = e.target as HTMLVideoElement;
+              video.play().catch(() => {
+                // Si autoplay échoue, on peut essayer de jouer après interaction
+              });
+            }}
           >
             <source src="/images/66823-520427407_small.mp4" type="video/mp4" />
           </video>
