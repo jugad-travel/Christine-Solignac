@@ -30,89 +30,107 @@ export default function Hero() {
       setVideoLoaded(true);
     };
 
-    const playVideo = async (video: HTMLVideoElement | null) => {
-      if (video) {
-        try {
-          // Transition douce au démarrage
-          video.style.opacity = '0';
-          video.style.transition = 'opacity 1.5s ease-in-out';
-          
-          // Forcer la lecture sur mobile
-          video.setAttribute('playsinline', 'true');
-          video.setAttribute('webkit-playsinline', 'true');
-          video.setAttribute('x5-playsinline', 'true');
-          video.muted = true;
-          
-          // Attendre que la vidéo soit prête
-          if (video.readyState >= 2) {
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-              playPromise
+    const forcePlayVideo = async (video: HTMLVideoElement, retries = 3) => {
+      if (!video) return;
+      
+      try {
+        // Forcer la lecture sur mobile
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('x5-playsinline', 'true');
+        video.muted = true;
+        video.playsInline = true;
+        
+        // Transition douce au démarrage
+        video.style.opacity = '0';
+        video.style.transition = 'opacity 1.5s ease-in-out';
+        
+        // Essayer de jouer immédiatement
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+          setTimeout(() => {
+            video.style.opacity = '1';
+          }, 200);
+          setVideoLoaded(true);
+        }
+      } catch (error) {
+        // Si échec, réessayer après un court délai
+        if (retries > 0) {
+          setTimeout(() => {
+            forcePlayVideo(video, retries - 1);
+          }, 300);
+        } else {
+          // Dernière tentative : attendre que la vidéo soit complètement chargée
+          const tryPlayWhenReady = () => {
+            if (video.readyState >= 3) {
+              video.play()
                 .then(() => {
                   setTimeout(() => {
                     video.style.opacity = '1';
                   }, 200);
+                  setVideoLoaded(true);
                 })
                 .catch(() => {
-                  // Si autoplay échoue, essayer après interaction utilisateur
-                  const handleInteraction = () => {
+                  // Si toujours bloqué, essayer sur événements de chargement
+                  video.addEventListener('canplay', () => {
                     video.play().then(() => {
                       setTimeout(() => {
                         video.style.opacity = '1';
                       }, 200);
-                    });
-                    document.removeEventListener('touchstart', handleInteraction);
-                    document.removeEventListener('click', handleInteraction);
-                  };
-                  document.addEventListener('touchstart', handleInteraction, { once: true });
-                  document.addEventListener('click', handleInteraction, { once: true });
+                      setVideoLoaded(true);
+                    }).catch(() => {});
+                  }, { once: true });
+                  
+                  video.addEventListener('canplaythrough', () => {
+                    video.play().then(() => {
+                      setTimeout(() => {
+                        video.style.opacity = '1';
+                      }, 200);
+                      setVideoLoaded(true);
+                    }).catch(() => {});
+                  }, { once: true });
                 });
+            } else {
+              setTimeout(tryPlayWhenReady, 100);
             }
-          } else {
-            video.addEventListener('loadeddata', () => {
-              const playPromise = video.play();
-              if (playPromise !== undefined) {
-                playPromise
-                  .then(() => {
-                    setTimeout(() => {
-                      video.style.opacity = '1';
-                    }, 200);
-                  })
-                  .catch(() => {
-                    // Si autoplay échoue, essayer après interaction utilisateur
-                    const handleInteraction = () => {
-                      video.play().then(() => {
-                        setTimeout(() => {
-                          video.style.opacity = '1';
-                        }, 200);
-                      });
-                      document.removeEventListener('touchstart', handleInteraction);
-                      document.removeEventListener('click', handleInteraction);
-                    };
-                    document.addEventListener('touchstart', handleInteraction, { once: true });
-                    document.addEventListener('click', handleInteraction, { once: true });
-                  });
-              }
-            }, { once: true });
-          }
-        } catch (error) {
-          console.log('Erreur de lecture vidéo:', error);
+          };
+          tryPlayWhenReady();
         }
       }
     };
 
+    // Utiliser IntersectionObserver pour déclencher la lecture dès que visible
+    const videoObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const video = entry.target as HTMLVideoElement;
+            forcePlayVideo(video);
+            videoObserver.unobserve(video);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
     if (videoRef.current) {
       videoRef.current.addEventListener('loadeddata', handleVideoLoad);
-      playVideo(videoRef.current);
+      videoObserver.observe(videoRef.current);
+      // Essayer aussi immédiatement
+      forcePlayVideo(videoRef.current);
     }
 
     if (videoRefMobile.current) {
       videoRefMobile.current.addEventListener('loadeddata', handleVideoLoad);
-      playVideo(videoRefMobile.current);
+      videoObserver.observe(videoRefMobile.current);
+      // Essayer aussi immédiatement
+      forcePlayVideo(videoRefMobile.current);
     }
 
     return () => {
       observer.disconnect();
+      videoObserver.disconnect();
     };
   }, []);
 
@@ -135,8 +153,13 @@ export default function Hero() {
               style={{ opacity: videoLoaded ? 1 : 0, transition: 'opacity 1s ease-in-out' }}
               onLoadedData={(e) => {
                 const video = e.target as HTMLVideoElement;
+                // Forcer la lecture immédiatement
+                video.muted = true;
+                video.playsInline = true;
                 video.play().catch(() => {
-                  // Si autoplay échoue, on peut essayer de jouer après interaction
+                  // Réessayer plusieurs fois
+                  setTimeout(() => video.play().catch(() => {}), 100);
+                  setTimeout(() => video.play().catch(() => {}), 500);
                 });
               }}
             >
